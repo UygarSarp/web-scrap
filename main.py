@@ -3,7 +3,17 @@ import time
 import requests
 import selectorlib
 import os
+import sqlite3
 import smtplib
+
+connection = sqlite3.connect("data.db")
+# cursor = connection.cursor()
+
+"""
+SELECT * FROM events WHERE city='Ben City'
+INSERT INTO events VALUES ('Ben','Ben City','2034.10.09')
+DELETE FROM events WHERE band='Ben'
+"""
 
 PASSWORD = os.getenv("PASS3")
 SENDER = "infocukamuran@gmail.com"
@@ -26,14 +36,21 @@ def extract(source):
 
 
 def store(extracted):
-    with open("data.txt", "a") as file:
-        file.write(extracted + "\n")
+    cursor = connection.cursor()
+    extracted = [tuple(extracted)]
+    cursor.executemany("INSERT INTO events VALUES(?,?,?)", extracted)
+    connection.commit()
 
 
-def read():
-    with open("data.txt", "r") as file:
-        cevap = file.read()
-    return cevap
+def read(values):
+    cursor = connection.cursor()
+    # cursor.execute("SELECT * FROM events")
+    # veri = cursor.fetchall()
+    band, city, date = values
+    cursor.execute("SELECT * FROM events WHERE band=? AND city=? AND date=?", (band, city, date))
+    veri = cursor.fetchall()
+    print(veri)
+    return veri
 
 
 def send_email(message):
@@ -55,9 +72,14 @@ if __name__ == "__main__":
         scrapped = scrap(URL)
         value = extract(scrapped)
         print(value)
-        check = read()
+        # value2 = value.split(", ")
+        value2 = value.split(",")
+        value2 = [i.strip() for i in value2]
+        # value2 = [tuple(value2)]
         if value != "No upcoming tours":
-            if value not in read():
-                store(value)
+            check = read(value2)
+            # if value2[0] not in read():
+            if not check:
+                store(value2)
                 send_email(value)
         time.sleep(2)
