@@ -1,3 +1,5 @@
 venv
 .idea
-EXAMPLE.py
+ali/EXAMPLE.py
+data.txt
+/ali/
