@@ -37,9 +37,10 @@ def extract(source):
 
 def store(extracted):
     cursor = connection.cursor()
-    extracted = [tuple(extracted)]
-    cursor.executemany("INSERT INTO events VALUES(?,?,?)", extracted)
+    cursor.execute("INSERT INTO events VALUES(?,?,?)", extracted)
     connection.commit()
+
+# execute tuple verir executemany liste verir !!!!!!
 
 
 def read(values):
